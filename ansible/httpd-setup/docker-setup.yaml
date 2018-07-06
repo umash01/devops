@@ -1,0 +1,39 @@
+# To install httpd and setup with a index.html file
+
+- hosts:
+  - all
+  tasks:
+  - name: "Enable EPEL repo"
+    command: yum-config-manager --enable "Red Hat Enterprise Linux Server 7 Extra(RPMs)"
+    become: true
+
+  - name: "Install docker"
+    yum:
+      name: docker
+      state: latest
+    become: true
+
+  - name: "Start docker"
+    service: 
+      name: docker
+      state: started
+    become: true
+
+  - name: "Copy Dockerfile to EC2 instance"
+    copy: 
+      src: /tmp/devops/ansible/httpd-setup/Dockerfile
+      dest: /tmp/Dockerfile
+      owner: root
+      group: root
+      mode: 0755
+    become: true
+
+  - name: "Build docker image"
+    command: docker build /tmp -t myimage:latest
+    become: true
+
+  - name: "Docker run image"
+    command: docker run -p 81:8080 myimage:latest
+    become: true
+
+
